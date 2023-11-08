@@ -9,7 +9,11 @@
 body {
     background-color: #333333;
 }
-
+.container {
+    width: 1280px;
+    max-width: 100%;
+    margin: 0 auto;
+}
 .header {
     background: linear-gradient(to right, #f14b00, #f37e2a, #f1c900);
 }
@@ -44,11 +48,6 @@ body {
     height: 30px;
 }
 
-.container {
-    width: 1440px;
-    max-width: 100%;
-    margin: 0 auto;
-}
 .header__content {
     display: flex;
     justify-content: space-between;
@@ -73,7 +72,7 @@ body {
 }
 
 .nav__button{
-    background-color: #f59831;
+    background-color: rgba(255, 203, 0, 0.72);
     color: #fff;
     max-width: 180px;
     padding: 10px 20px;
@@ -164,14 +163,17 @@ body {
     border: 2px solid red;
 }
 
+
+.movies__content {
+    display: flex;
+    justify-content: start;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
 .movie_content-favorite {
     width: 50px;
     height: 50px;
     cursor: pointer;
-}
-.movies__content {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
+    fill: red;
 }
