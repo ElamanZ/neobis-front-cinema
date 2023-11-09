@@ -1,23 +1,25 @@
-const favoriteBtn = document.getElementById('favorite-btn')
-
-
-// let isRed = false
-// favoriteBtn.addEventListener('click', () => {
-//     isRed = !isRed
-//     if (isRed) {
-//         favoriteBtn.src = "image/heart__red.png"
-//     } else {
-//         favoriteBtn.src = "image/heart__white.png"
-//     }
-//     console.log('click favorite')
-// })
 const moviesContent = document.getElementById('movies-content');
 const form = document.querySelector("form");
 const searchInput = document.querySelector(".header__input");
+const premiereMoviesBtn = document.getElementById('premiereMovies')
+const anticipatedMoviesBtn = document.getElementById('anticipatedMovies')
+const popularMoviesBtn = document.getElementById('popularMovies')
+const realesesMonthMoviesBtn = document.getElementById('realesesMonthMovies')
+const favoriteBtn = document.getElementById('favorite-btn')
+
+const infoDate = new Date();
+const monthOfYear = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+const month = monthOfYear[infoDate.getMonth()]
+const year = infoDate.getFullYear()
+console.log(month, year)
 
 const API_KEY = 'f8b7220a-ec1b-477a-a473-19c5fd9c1329';
-const API_URL_PREMIERES = "https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=2023&month=NOVEMBER";
+const API_URL_PREMIERES = `https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?year=${year}&month=${month}`;
+const API_URL_ANTICIPADET = 'https://kinopoiskapiunofficial.tech/api/v2.2/films/collections?type=CLOSES_RELEASES&page=1';
 const API_URL_SEARCH = "https://kinopoiskapiunofficial.tech/api/v2.1/films/search-by-keyword?keyword=";
+const API_URL_POPULAR = "https://kinopoiskapiunofficial.tech/api/v2.2/films/collections?type=TOP_POPULAR_ALL&page=1";
+const API_URL_REALASES = `https://kinopoiskapiunofficial.tech/api/v2.1/films/releases?year=${year}&month=${month}`
+
 
 getMovies(API_URL_PREMIERES);
 
@@ -50,8 +52,44 @@ function getClassByRate(rating) {
 
 function showMovies(data) {
     moviesContent.innerHTML = ""
-    if (data.items){
-        data.items.forEach(movie => {
+
+    if (data.releases) {
+        data.releases.slice(0, 10).forEach(movie => {
+            const movieElement = document.createElement("div");
+            movieElement.innerHTML = `
+            <div class="movie">
+                <div class="movie__cover-inner">
+                    <img class="movie__cover" src="${movie.posterUrl}" alt="logo">
+                </div>
+                <div class="movie__info">
+                    <div class="movie_content-info">
+                        <div class="movie__title">${movie.nameRu}</div>
+                        <div class="movie__category">${movie.genres.map(genre => genre.genre).join(', ')}</div>
+                        <div class="movie__year">${movie.year}</div>
+                        
+                        ${movie.rating !== undefined && movie.rating !== null ? `
+                            <div class="movie__average 
+                            movie__average--${getClassByRate(movie.rating)}">
+                                ${movie.rating}
+                            </div>
+                        ` : ''}
+                   
+                    </div>
+                    <div class="movie_content-favorite">
+                        <img id="favorite-btn"
+                             src="image/heart__white.png"
+                             alt="logo_favorite"
+                        >
+                    </div>
+                </div>
+            </div>
+        `;
+
+            moviesContent.appendChild(movieElement);
+        });
+    }
+    if (data.films) {
+        data.films.slice(0, 10).forEach(movie => {
             const movieElement = document.createElement("div");
             movieElement.innerHTML = `
             <div class="movie">
@@ -84,12 +122,11 @@ function showMovies(data) {
 
             moviesContent.appendChild(movieElement);
         });
-
-
-        if (data.films) {
-            data.films.forEach(movie => {
-                const movieElement = document.createElement("div");
-                movieElement.innerHTML = `
+    }
+    if (data.items) {
+        data.items.slice(0, 10).forEach(movie => {
+            const movieElement = document.createElement("div");
+            movieElement.innerHTML = `
             <div class="movie">
                 <div class="movie__cover-inner">
                     <img class="movie__cover" src="${movie.posterUrl}" alt="logo">
@@ -100,7 +137,7 @@ function showMovies(data) {
                         <div class="movie__category">${movie.genres.map(genre => genre.genre).join(', ')}</div>
                         <div class="movie__year">${movie.year}</div>
                         
-                        ${movie.rating !== undefined ? `
+                        ${movie.rating !== undefined||null ? `
                               <div class="movie__average 
                               movie__average--${getClassByRate(movie.rating)}">
                                 ${movie.rating}
@@ -118,14 +155,11 @@ function showMovies(data) {
             </div>
         `;
 
-                moviesContent.appendChild(movieElement);
-            });
-        }
+            moviesContent.appendChild(movieElement);
+        });
     }
 
 }
-
-
 
 form.addEventListener("submit", (e) => {
     e.preventDefault()
@@ -137,6 +171,34 @@ form.addEventListener("submit", (e) => {
         searchInput.value = ""
     }
     return getMovies(apiSearchUrl)
+})
+
+
+premiereMoviesBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    const premiereMovies = `${API_URL_PREMIERES}`
+
+    return getMovies(premiereMovies)
+
+})
+anticipatedMoviesBtn.addEventListener("click", (e) => {
+    e.preventDefault()
+    const anticipatedMovies = `${API_URL_ANTICIPADET}`
+    return getMovies(anticipatedMovies)
+})
+
+realesesMonthMoviesBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    const realesesMonthMovies = `${API_URL_REALASES}`
+
+    return getMovies(realesesMonthMovies)
+
+})
+
+popularMoviesBtn.addEventListener('click', (e) => {
+    e.preventDefault()
+    const popularMovies = `${API_URL_POPULAR}`
+    return getMovies(popularMovies)
 })
 
 
