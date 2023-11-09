@@ -94,10 +94,11 @@ body {
 }
 
 .nav__button:hover {
-    background: linear-gradient(to right, #FD531A, #F3682A, #E09E21);
+    background: linear-gradient(to right, #d2886c, #8e9447, #f69e00);
 
 }
 .nav__button:active, .nav__button.selected {
+    background: linear-gradient(to right, #FD531A, #F3682A, #E09E21);
     box-shadow: 0 0 10px #ff9d2f;
     transition: background-color 0.1s, color 0.1s, box-shadow 0.1s; /* Анимация при активации или выборе */
 }
