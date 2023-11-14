@@ -1,6 +1,6 @@
 # ReadMe для проекта "MovieApp"
 
-## Ссылка: (https://elamanz.github.io/cinema-front-todoList/)
+## Ссылка: (https://elamanz.github.io/neobis-front-cinema/)
 
 ## Описание проекта
 
