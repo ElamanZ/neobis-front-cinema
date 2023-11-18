@@ -30,7 +30,9 @@ async function getMovies(url) {
             },
         });
         const respData = await resp.json();
+        console.log(respData); // Для отладки
         showMovies(respData);
+
     } catch (error) {
         console.error(error);
     }
@@ -47,17 +49,17 @@ function getClassByRate(rating) {
 }
 
 
-
-
-function showMovies(data) {
+function showMovies(data, showFavorites = false) {
     moviesContent.innerHTML = "";
     const favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
 
-    const items = data.releases || data.films || data.items;
-    items.slice(0, 30).forEach((movie) => {
-        const isFavorite = favoriteMovies.some(favMovie => favMovie.kinopoiskId === movie.kinopoiskId);
+    const items = showFavorites ? favoriteMovies : data.releases || data.items || data.films;
+    items.forEach((movie) => {
+        const movieId = movie.kinopoiskId || movie.filmId;
+        const isFavorite = favoriteMovies.some(favMovie => favMovie.kinopoiskId === movieId);
+
         const movieElement = document.createElement("div");
-        movieElement.dataset.kinopoiskId = movie.kinopoiskId; // Add the data-kinopoisk-id attribute
+        movieElement.dataset.kinopoiskId = movieId;
         movieElement.innerHTML = `
             <div class="movie">
                 <div class="movie__cover-inner">
@@ -68,38 +70,32 @@ function showMovies(data) {
                         <div class="movie__title">${movie.nameRu}</div>
                         <div class="movie__category">${movie.genres.map(genre => genre.genre).join(', ')}</div>
                         <div class="movie__year">${movie.year}</div>
-                        
+
                         ${movie.rating !== undefined && movie.rating !== null ? `
-                            <div class="movie__average 
+                            <div class="movie__average
                             movie__average--${getClassByRate(movie.rating)}">
                                 ${movie.rating}
                             </div>
                         ` : ''}
-                   
+
                     </div>
-                    <div class="movie_content-favorite">
-                        <img 
-                            class="favorite-btn"
-                            data-kinopoisk-id="${movie.kinopoiskId}"
-                            src="${isFavorite ? 'image/heart__red.png' : 'image/heart__white.png'}"
-                            alt="logo_favorite"
-                       
-                        >
-                    </div>
+                  <div class="movie_content-favorite">
+                    <img
+                        class="favorite-btn"
+                        data-kinopoisk-id="${movieId}" // Используйте movieId здесь
+                        src="${isFavorite ? 'image/heart__red.png' : 'image/heart__white.png'}"
+                        alt="logo_favorite"
+                    >
+                </div>
                 </div>
             </div>
         `;
 
         const favoriteBtn = movieElement.querySelector(".favorite-btn");
-
         favoriteBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            if (isFavorite) {
-                removeFavorite(movie.kinopoiskId);
-            } else {
-                toggleFavorite(movie);
-            }
-            showMovies(data);
+            const isNowFavorite = toggleFavorite({ ...movie, kinopoiskId: movieId });
+            favoriteBtn.src = isNowFavorite ? 'image/heart__red.png' : 'image/heart__white.png';
         });
 
         moviesContent.appendChild(movieElement);
@@ -109,42 +105,56 @@ function showMovies(data) {
 function toggleFavorite(movie) {
     const favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
     const movieIndex = favoriteMovies.findIndex(favMovie => favMovie.kinopoiskId === movie.kinopoiskId);
+    let isFavoriteNow;
 
     if (movieIndex === -1) {
         favoriteMovies.push(movie);
+        isFavoriteNow = true;
     } else {
         favoriteMovies.splice(movieIndex, 1);
+        if (isViewingFavorites()) {
+            const movieElement = document.querySelector(`div[data-kinopoisk-id="${movie.kinopoiskId}"]`);
+            if (movieElement) {
+                movieElement.remove();
+            } else {
+                console.error('Element not found:', movie.kinopoiskId);
+            }
+        }
+        isFavoriteNow = false;
     }
 
     localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
-
-    showMovies({ films: favoriteMovies });
-
-    return favoriteMovies;
+    return isFavoriteNow;
 }
 
-function removeFavorite(kinopoiskId) {
-    const favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
-    const updatedFavorites = favoriteMovies.filter(movie => movie.kinopoiskId !== kinopoiskId);
-    localStorage.setItem('favoriteMovies', JSON.stringify(updatedFavorites));
-
-    showMovies({ films: updatedFavorites });
-
-    return updatedFavorites;
+function isViewingFavorites() {
+    return moviesContent.classList.contains('favorites-view');
 }
 
 
+
+function setActiveButton(buttonId) {
+    // Удаление класса 'selected' у всех кнопок
+    const navButtons = document.querySelectorAll('.nav__button');
+    navButtons.forEach(btn => {
+        btn.classList.remove('selected');
+    });
+
+    // Добавление класса 'selected' только к выбранной кнопке
+    const selectedButton = document.getElementById(buttonId);
+    selectedButton.classList.add('selected');
+}
 
 favoriteMoviesBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    moviesContent.classList.add('favorites-view');
     const favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
+    showMovies({ films: favoriteMovies }, true);
 
-    if (favoriteMovies.length > 0) {
-        showMovies({ films: favoriteMovies });
-    } else {
-        console.log('No favorite movies.');
-    }
+    setActiveButton('favoriteMovies');
 });
+
+
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -155,22 +165,28 @@ form.addEventListener("submit", (e) => {
     }
 });
 
+
+
 premiereMoviesBtn.addEventListener('click', (e) => {
     e.preventDefault();
     getMovies(API_URL_PREMIERES);
+    setActiveButton('premiereMovies');
 });
 
 anticipatedMoviesBtn.addEventListener("click", (e) => {
     e.preventDefault();
     getMovies(API_URL_ANTICIPATED);
+    setActiveButton('anticipatedMovies');
 });
 
 realesesMonthMoviesBtn.addEventListener('click', (e) => {
     e.preventDefault();
     getMovies(API_URL_RELEASES);
+    setActiveButton('realesesMonthMovies');
 });
 
 popularMoviesBtn.addEventListener('click', (e) => {
     e.preventDefault();
     getMovies(API_URL_POPULAR);
+    setActiveButton('popularMovies');
 });

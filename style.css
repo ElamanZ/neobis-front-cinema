@@ -87,6 +87,8 @@ body {
 
 
 }
+
+
 .nav__button p{
     text-align: center;
     font-size: 18px;
@@ -98,9 +100,9 @@ body {
 
 }
 .nav__button:active, .nav__button.selected {
-    background: linear-gradient(to right, #FD531A, #F3682A, #E09E21);
+    background: #ee5b08;
     box-shadow: 0 0 10px #ff9d2f;
-    transition: background-color 0.1s, color 0.1s, box-shadow 0.1s; /* Анимация при активации или выборе */
+    transition: background-color 0.1s, color 0.1s, box-shadow 0.1s;
 }
 
 .movies {
@@ -128,7 +130,7 @@ body {
     justify-content: space-between;
 }
 .movie__title {
-    font-size: 16px;
+    font-size: 20px;
     color: #FFFFFF;
 }
 .movie__year {
