@@ -96,6 +96,11 @@ function showMovies(data, showFavorites = false) {
             e.preventDefault();
             const isNowFavorite = toggleFavorite({ ...movie, kinopoiskId: movieId });
             favoriteBtn.src = isNowFavorite ? 'image/heart__red.png' : 'image/heart__white.png';
+
+            if (!isNowFavorite && showFavorites) {
+                movieElement.remove();
+            }
+
         });
 
         moviesContent.appendChild(movieElement);
@@ -112,14 +117,6 @@ function toggleFavorite(movie) {
         isFavoriteNow = true;
     } else {
         favoriteMovies.splice(movieIndex, 1);
-        if (isViewingFavorites()) {
-            const movieElement = document.querySelector(`div[data-kinopoisk-id="${movie.kinopoiskId}"]`);
-            if (movieElement) {
-                movieElement.remove();
-            } else {
-                console.error('Element not found:', movie.kinopoiskId);
-            }
-        }
         isFavoriteNow = false;
     }
 
@@ -127,20 +124,13 @@ function toggleFavorite(movie) {
     return isFavoriteNow;
 }
 
-function isViewingFavorites() {
-    return moviesContent.classList.contains('favorites-view');
-}
-
-
 
 function setActiveButton(buttonId) {
-    // Удаление класса 'selected' у всех кнопок
     const navButtons = document.querySelectorAll('.nav__button');
     navButtons.forEach(btn => {
         btn.classList.remove('selected');
     });
 
-    // Добавление класса 'selected' только к выбранной кнопке
     const selectedButton = document.getElementById(buttonId);
     selectedButton.classList.add('selected');
 }
@@ -163,6 +153,7 @@ form.addEventListener("submit", (e) => {
         getMovies(apiSearchUrl);
         searchInput.value = "";
     }
+    setActiveButton('')
 });
 
 
